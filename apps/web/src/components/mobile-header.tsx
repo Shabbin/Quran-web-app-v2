@@ -5,9 +5,14 @@ import { Menu, Search, Settings } from "lucide-react";
 type MobileHeaderProps = {
   onOpenMenu: () => void;
   onOpenSearch: () => void;
+  onOpenSettings: () => void;
 };
 
-export function MobileHeader({ onOpenMenu, onOpenSearch }: MobileHeaderProps) {
+export function MobileHeader({
+  onOpenMenu,
+  onOpenSearch,
+  onOpenSettings,
+}: MobileHeaderProps) {
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between border-b border-emerald-100 bg-white/95 px-4 py-3 backdrop-blur dark:border-zinc-800 dark:bg-[#090b09]/95 lg:hidden">
       <button
@@ -39,6 +44,7 @@ export function MobileHeader({ onOpenMenu, onOpenSearch }: MobileHeaderProps) {
         </button>
         <button
           type="button"
+          onClick={onOpenSettings}
           className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 dark:bg-zinc-900 dark:text-zinc-300"
           aria-label="Settings"
         >

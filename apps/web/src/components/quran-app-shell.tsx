@@ -8,6 +8,7 @@ import { AyahCard } from "./ayah-card";
 import { BottomNav } from "./bottom-nav";
 import { IconSidebar } from "./icon-sidebar";
 import { MobileHeader } from "./mobile-header";
+import { MobileSettingsDrawer } from "./mobile-settings-drawer";
 import { MobileSurahDrawer } from "./mobile-surah-drawer";
 import { SearchModal } from "./search-modal";
 import { SettingsPanel } from "./settings-panel";
@@ -21,6 +22,7 @@ type QuranAppShellProps = {
 export function QuranAppShell({ surahs, activeSurah }: QuranAppShellProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileSettingsOpen, setIsMobileSettingsOpen] = useState(false);
 
   const { settings, resolvedTheme, updateSettings } = useReaderSettings();
 
@@ -45,6 +47,7 @@ export function QuranAppShell({ surahs, activeSurah }: QuranAppShellProps) {
       <MobileHeader
         onOpenMenu={() => setIsMobileMenuOpen(true)}
         onOpenSearch={() => setIsSearchOpen(true)}
+        onOpenSettings={() => setIsMobileSettingsOpen(true)}
       />
 
       <div className="flex min-h-screen">
@@ -134,6 +137,13 @@ export function QuranAppShell({ surahs, activeSurah }: QuranAppShellProps) {
         activeSurahId={activeSurah.id}
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
+      />
+
+      <MobileSettingsDrawer
+        isOpen={isMobileSettingsOpen}
+        settings={settings}
+        onChange={updateSettings}
+        onClose={() => setIsMobileSettingsOpen(false)}
       />
 
       <BottomNav />
