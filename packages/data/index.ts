@@ -88,3 +88,8 @@ export function getAudioUrl(surahId: number, ayahNumber: number): string {
 
   return `https://everyayah.com/data/Alafasy_128kbps/${surah}${ayah}.mp3`;
 }
+export {
+  getReaderPages,
+  getReaderPageByNumber,
+  type ReaderPage,
+} from "./reader-pages";
