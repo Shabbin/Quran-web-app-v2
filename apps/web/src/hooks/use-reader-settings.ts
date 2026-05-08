@@ -17,9 +17,48 @@ const STORAGE_KEY = "quran-reader-settings";
 const defaultSettings: ReaderSettings = {
   theme: "light",
   arabicFont: "amiri",
-  arabicFontSize: 34,
+  arabicFontSize: 32,
   translationFontSize: 17,
 };
+
+function clampNumber(value: unknown, min: number, max: number, fallback: number) {
+  const numberValue = Number(value);
+
+  if (Number.isNaN(numberValue)) {
+    return fallback;
+  }
+
+  return Math.min(Math.max(numberValue, min), max);
+}
+
+function isValidTheme(value: unknown): value is ReaderTheme {
+  return value === "light" || value === "dark" || value === "sepia" || value === "system";
+}
+
+function isValidArabicFont(value: unknown): value is ArabicFont {
+  return value === "amiri" || value === "scheherazade";
+}
+
+function sanitizeSettings(value: Partial<ReaderSettings>): ReaderSettings {
+  return {
+    theme: isValidTheme(value.theme) ? value.theme : defaultSettings.theme,
+    arabicFont: isValidArabicFont(value.arabicFont)
+      ? value.arabicFont
+      : defaultSettings.arabicFont,
+    arabicFontSize: clampNumber(
+      value.arabicFontSize,
+      26,
+      42,
+      defaultSettings.arabicFontSize
+    ),
+    translationFontSize: clampNumber(
+      value.translationFontSize,
+      14,
+      20,
+      defaultSettings.translationFontSize
+    ),
+  };
+}
 
 function getInitialSettings(): ReaderSettings {
   if (typeof window === "undefined") {
@@ -33,10 +72,7 @@ function getInitialSettings(): ReaderSettings {
   }
 
   try {
-    return {
-      ...defaultSettings,
-      ...JSON.parse(stored),
-    };
+    return sanitizeSettings(JSON.parse(stored));
   } catch {
     return defaultSettings;
   }
@@ -71,10 +107,14 @@ export function useReaderSettings() {
     key: K,
     value: ReaderSettings[K]
   ) => {
-    setSettings((current) => ({
-      ...current,
-      [key]: value,
-    }));
+    setSettings((current) => {
+      const nextSettings = {
+        ...current,
+        [key]: value,
+      };
+
+      return sanitizeSettings(nextSettings);
+    });
   };
 
   return {

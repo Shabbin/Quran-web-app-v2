@@ -26,10 +26,10 @@ export function QuranAppShell({ surahs, activeSurah }: QuranAppShellProps) {
 
   const { settings, resolvedTheme, updateSettings } = useReaderSettings();
 
-  const arabicFontClass =
+  const arabicFontFamily =
     settings.arabicFont === "scheherazade"
-      ? "font-[var(--font-scheherazade)]"
-      : "font-[var(--font-amiri)]";
+      ? "var(--font-scheherazade), serif"
+      : "var(--font-amiri), serif";
 
   const isDark = resolvedTheme === "dark";
   const isSepia = resolvedTheme === "sepia";
@@ -95,18 +95,24 @@ export function QuranAppShell({ surahs, activeSurah }: QuranAppShellProps) {
                   <p className="text-sm uppercase tracking-[0.25em] text-emerald-100">
                     Surah {activeSurah.id}
                   </p>
+
                   <h1 className="mt-2 text-3xl font-bold sm:text-4xl">
                     {activeSurah.englishName}
                   </h1>
+
                   <p className="mt-2 text-emerald-100">
                     {activeSurah.englishNameTranslation}
                   </p>
                 </div>
 
                 <div className="text-left sm:text-right">
-                  <p className={`${arabicFontClass} text-4xl leading-none`}>
+                  <p
+                    className="text-4xl leading-none"
+                    style={{ fontFamily: arabicFontFamily }}
+                  >
                     {activeSurah.arabicName}
                   </p>
+
                   <p className="mt-3 text-sm text-emerald-100">
                     {activeSurah.numberOfAyahs} Ayahs •{" "}
                     {activeSurah.revelationType}
@@ -120,7 +126,7 @@ export function QuranAppShell({ surahs, activeSurah }: QuranAppShellProps) {
                 <AyahCard
                   key={ayah.id}
                   ayah={ayah}
-                  arabicFontClass={arabicFontClass}
+                  arabicFontFamily={arabicFontFamily}
                   arabicFontSize={settings.arabicFontSize}
                   translationFontSize={settings.translationFontSize}
                 />

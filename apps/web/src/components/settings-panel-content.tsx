@@ -30,10 +30,19 @@ const themes: { label: string; value: ReaderTheme; icon: typeof Sun }[] = [
   { label: "System", value: "system", icon: Settings },
 ];
 
-const fonts: { label: string; value: ArabicFont }[] = [
-  { label: "Amiri", value: "amiri" },
-  { label: "Scheherazade", value: "scheherazade" },
+const fonts: { label: string; value: ArabicFont; preview: string }[] = [
+  { label: "Amiri", value: "amiri", preview: "بِسْمِ ٱللَّهِ الرَّحْمَٰنِ الرَّحِيمِ" },
+  {
+    label: "Scheherazade",
+    value: "scheherazade",
+    preview: "بِسْمِ ٱللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+  },
 ];
+
+const previewFontFamily = {
+  amiri: "var(--font-amiri), serif",
+  scheherazade: "var(--font-scheherazade), serif",
+} satisfies Record<ArabicFont, string>;
 
 export function SettingsPanelContent({
   settings,
@@ -62,9 +71,9 @@ export function SettingsPanelContent({
                 key={theme.value}
                 type="button"
                 onClick={() => onChange("theme", theme.value)}
-                className={`flex items-center gap-2 rounded-2xl px-3 py-3 text-sm transition ${
+                className={`flex items-center gap-2 rounded-2xl px-3 py-3 text-sm font-medium transition ${
                   isActive
-                    ? "bg-emerald-600 text-white"
+                    ? "bg-emerald-600 text-white shadow-sm"
                     : "bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
                 }`}
               >
@@ -98,14 +107,19 @@ export function SettingsPanelContent({
             </div>
             <input
               type="range"
-              min="24"
-              max="52"
+              min="26"
+              max="42"
               value={settings.arabicFontSize}
               onChange={(event) =>
                 onChange("arabicFontSize", Number(event.target.value))
               }
               className="w-full accent-emerald-700"
             />
+            <div className="mt-2 flex justify-between text-xs text-slate-400 dark:text-zinc-600">
+              <span>Compact</span>
+              <span>Comfortable</span>
+              <span>Large</span>
+            </div>
           </label>
 
           <label className="block">
@@ -120,13 +134,18 @@ export function SettingsPanelContent({
             <input
               type="range"
               min="14"
-              max="24"
+              max="20"
               value={settings.translationFontSize}
               onChange={(event) =>
                 onChange("translationFontSize", Number(event.target.value))
               }
               className="w-full accent-emerald-700"
             />
+            <div className="mt-2 flex justify-between text-xs text-slate-400 dark:text-zinc-600">
+              <span>Small</span>
+              <span>Balanced</span>
+              <span>Readable</span>
+            </div>
           </label>
 
           <label className="block">
@@ -146,6 +165,26 @@ export function SettingsPanelContent({
                 </option>
               ))}
             </select>
+
+            <div className="mt-3 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-right dark:border-emerald-900/40 dark:bg-emerald-950/20">
+              <p
+                dir="rtl"
+                className="text-slate-900 dark:text-zinc-100"
+                style={{
+                  fontFamily: previewFontFamily[settings.arabicFont],
+                  fontSize: 24,
+                  lineHeight: 2,
+                }}
+              >
+                {
+                  fonts.find((font) => font.value === settings.arabicFont)
+                    ?.preview
+                }
+              </p>
+              <p className="mt-2 text-left text-xs font-medium text-emerald-700 dark:text-emerald-500">
+                Preview: {settings.arabicFont === "amiri" ? "Amiri" : "Scheherazade"}
+              </p>
+            </div>
           </label>
         </div>
       </section>

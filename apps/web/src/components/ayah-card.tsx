@@ -4,14 +4,14 @@ import { AudioButton } from "./audio-button";
 
 type AyahCardProps = {
   ayah: Ayah;
-  arabicFontClass: string;
+  arabicFontFamily: string;
   arabicFontSize: number;
   translationFontSize: number;
 };
 
 export function AyahCard({
   ayah,
-  arabicFontClass,
+  arabicFontFamily,
   arabicFontSize,
   translationFontSize,
 }: AyahCardProps) {
@@ -25,17 +25,32 @@ export function AyahCard({
           <span className="rounded-full bg-emerald-50 px-3 py-1 text-sm font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">
             {ayah.surahId}:{ayah.numberInSurah}
           </span>
+
           <AudioButton surahId={ayah.surahId} ayahNumber={ayah.numberInSurah} />
         </div>
 
         <div className="flex items-center gap-2 text-slate-400 dark:text-zinc-500">
-          <button className="rounded-full p-2 hover:bg-slate-50 dark:hover:bg-zinc-900" type="button">
+          <button
+            className="rounded-full p-2 hover:bg-slate-50 dark:hover:bg-zinc-900"
+            type="button"
+            aria-label="Copy ayah"
+          >
             <Copy size={17} />
           </button>
-          <button className="rounded-full p-2 hover:bg-slate-50 dark:hover:bg-zinc-900" type="button">
+
+          <button
+            className="rounded-full p-2 hover:bg-slate-50 dark:hover:bg-zinc-900"
+            type="button"
+            aria-label="Bookmark ayah"
+          >
             <Bookmark size={17} />
           </button>
-          <button className="rounded-full p-2 hover:bg-slate-50 dark:hover:bg-zinc-900" type="button">
+
+          <button
+            className="rounded-full p-2 hover:bg-slate-50 dark:hover:bg-zinc-900"
+            type="button"
+            aria-label="More options"
+          >
             <MoreHorizontal size={17} />
           </button>
         </div>
@@ -43,8 +58,12 @@ export function AyahCard({
 
       <p
         dir="rtl"
-        className={`${arabicFontClass} mb-8 text-right leading-[2.4] text-slate-950 dark:text-zinc-100`}
-        style={{ fontSize: arabicFontSize }}
+        className="mb-8 text-right text-slate-950 dark:text-zinc-100"
+        style={{
+          fontFamily: arabicFontFamily,
+          fontSize: arabicFontSize,
+          lineHeight: 2.25,
+        }}
       >
         {ayah.arabic}
       </p>
@@ -53,9 +72,13 @@ export function AyahCard({
         <p className="mb-2 text-xs font-bold uppercase tracking-[0.22em] text-emerald-600 dark:text-emerald-500">
           Saheeh International
         </p>
+
         <p
-          className="leading-8 text-slate-700 dark:text-zinc-300"
-          style={{ fontSize: translationFontSize }}
+          className="text-slate-700 dark:text-zinc-300"
+          style={{
+            fontSize: translationFontSize,
+            lineHeight: 1.75,
+          }}
         >
           {ayah.translation}
         </p>
