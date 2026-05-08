@@ -1,0 +1,89 @@
+import type { Ayah } from "./types";
+
+export const ayahs: Ayah[] = [
+  {
+    id: 1,
+    surahId: 1,
+    numberInSurah: 1,
+    juz: 1,
+    page: 1,
+    arabic: "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+    translation: "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
+  },
+  {
+    id: 2,
+    surahId: 1,
+    numberInSurah: 2,
+    juz: 1,
+    page: 1,
+    arabic: "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+    translation: "All praise is due to Allah, Lord of the worlds.",
+  },
+  {
+    id: 3,
+    surahId: 1,
+    numberInSurah: 3,
+    juz: 1,
+    page: 1,
+    arabic: "الرَّحْمَٰنِ الرَّحِيمِ",
+    translation: "The Entirely Merciful, the Especially Merciful.",
+  },
+  {
+    id: 4,
+    surahId: 1,
+    numberInSurah: 4,
+    juz: 1,
+    page: 1,
+    arabic: "مَالِكِ يَوْمِ الدِّينِ",
+    translation: "Sovereign of the Day of Recompense.",
+  },
+  {
+    id: 5,
+    surahId: 1,
+    numberInSurah: 5,
+    juz: 1,
+    page: 1,
+    arabic: "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
+    translation: "It is You we worship and You we ask for help.",
+  },
+  {
+    id: 6,
+    surahId: 1,
+    numberInSurah: 6,
+    juz: 1,
+    page: 1,
+    arabic: "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ",
+    translation: "Guide us to the straight path.",
+  },
+  {
+    id: 7,
+    surahId: 1,
+    numberInSurah: 7,
+    juz: 1,
+    page: 1,
+    arabic:
+      "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ",
+    translation:
+      "The path of those upon whom You have bestowed favor, not of those who have evoked Your anger or of those who are astray.",
+  },
+  {
+    id: 8,
+    surahId: 2,
+    numberInSurah: 1,
+    juz: 1,
+    page: 2,
+    arabic: "الم",
+    translation: "Alif, Lam, Meem.",
+  },
+  {
+    id: 9,
+    surahId: 2,
+    numberInSurah: 2,
+    juz: 1,
+    page: 2,
+    arabic:
+      "ذَٰلِكَ الْكِتَابُ لَا رَيْبَ ۛ فِيهِ ۛ هُدًى لِّلْمُتَّقِينَ",
+    translation:
+      "This is the Book about which there is no doubt, a guidance for those conscious of Allah.",
+  },
+];
