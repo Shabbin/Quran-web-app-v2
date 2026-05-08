@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@quran-web-app/data": "*",
     "hono": "^4.12.18"
   },
   "devDependencies": {
