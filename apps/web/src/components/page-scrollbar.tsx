@@ -26,12 +26,7 @@ export function PageScrollbar({ resolvedTheme }: PageScrollbarProps) {
     height: 0,
   });
 
-  const thumbColor =
-    resolvedTheme === "sepia"
-      ? "#a07a50"
-      : resolvedTheme === "dark"
-        ? "#3d8738"
-        : "#3d8738";
+  const thumbColor = resolvedTheme === "sepia" ? "#a07a50" : "#3d8738";
 
   const updateThumb = useCallback(() => {
     const documentElement = document.documentElement;
@@ -175,7 +170,7 @@ export function PageScrollbar({ resolvedTheme }: PageScrollbarProps) {
       document.body.style.userSelect = "";
     };
 
-    updateThumb();
+    scheduleThumbUpdate();
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleResize);
@@ -189,7 +184,7 @@ export function PageScrollbar({ resolvedTheme }: PageScrollbarProps) {
     resizeObserver.observe(document.body);
     resizeObserver.observe(document.documentElement);
 
-    const timeoutId = window.setTimeout(updateThumb, 150);
+    const timeoutId = window.setTimeout(scheduleThumbUpdate, 150);
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
