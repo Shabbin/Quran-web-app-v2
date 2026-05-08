@@ -3,9 +3,9 @@ import { QuranAppShell } from "@/components/quran-app-shell";
 import { notFound } from "next/navigation";
 
 type SurahPageProps = {
-  params: {
+  params: Promise<{
     surahId: string;
-  };
+  }>;
 };
 
 export function generateStaticParams() {
@@ -14,9 +14,25 @@ export function generateStaticParams() {
   }));
 }
 
-export default function SurahPage({ params }: SurahPageProps) {
-  const surahId = Number(params.surahId);
-  const surah = getSurahById(surahId);
+export async function generateMetadata({ params }: SurahPageProps) {
+  const { surahId } = await params;
+  const surah = getSurahById(Number(surahId));
+
+  if (!surah) {
+    return {
+      title: "Surah Not Found",
+    };
+  }
+
+  return {
+    title: `${surah.englishName} - Quran Web App`,
+    description: `Read ${surah.englishName} with Arabic text, translation, and audio playback.`,
+  };
+}
+
+export default async function SurahPage({ params }: SurahPageProps) {
+  const { surahId } = await params;
+  const surah = getSurahById(Number(surahId));
 
   if (!surah) {
     notFound();

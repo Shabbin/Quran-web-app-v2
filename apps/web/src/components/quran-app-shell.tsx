@@ -1,6 +1,6 @@
 "use client";
 
-import type { Surah, SurahWithAyahs } from "@quran-web-app/data";
+import type { Ayah, Surah, SurahWithAyahs } from "@quran-web-app/data";
 import { Search, Settings } from "lucide-react";
 import { useState } from "react";
 import { useReaderSettings } from "@/hooks/use-reader-settings";
@@ -113,7 +113,7 @@ export function QuranAppShell({ surahs, activeSurah }: QuranAppShellProps) {
             </header>
 
             <div className="space-y-5">
-              {activeSurah.ayahs.map((ayah) => (
+              {activeSurah.ayahs.map((ayah: Ayah) => (
                 <AyahCard
                   key={ayah.id}
                   ayah={ayah}

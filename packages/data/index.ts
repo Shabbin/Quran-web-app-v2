@@ -28,12 +28,21 @@ export function getAyahsBySurahId(surahId: number): Ayah[] {
 
 function normalizeArabicText(value: string): string {
   return value
-    .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, "")
-    .replace(/[إأآا]/g, "ا")
+    // Remove Arabic/Quranic marks, harakat, small signs, tatweel
+    .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, "")
+    // Normalize different alif forms, including alif wasla: ٱ
+    .replace(/[إأآٱا]/g, "ا")
+    // Normalize common Uthmani spellings:
+    // الصلوة -> الصلاة, الزكوة -> الزكاة, الحيوة -> الحياة
+    .replace(/وة/g, "اة")
+    // Normalize ya/alif maqsura
     .replace(/ى/g, "ي")
+    // Normalize hamza forms
     .replace(/ؤ/g, "و")
     .replace(/ئ/g, "ي")
+    // Normalize ta marbuta
     .replace(/ة/g, "ه")
+    // Remove extra spaces
     .replace(/\s+/g, " ")
     .trim();
 }

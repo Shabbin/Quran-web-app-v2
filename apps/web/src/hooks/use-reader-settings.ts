@@ -21,48 +21,51 @@ const defaultSettings: ReaderSettings = {
   translationFontSize: 17,
 };
 
+function getInitialSettings(): ReaderSettings {
+  if (typeof window === "undefined") {
+    return defaultSettings;
+  }
+
+  const stored = window.localStorage.getItem(STORAGE_KEY);
+
+  if (!stored) {
+    return defaultSettings;
+  }
+
+  try {
+    return {
+      ...defaultSettings,
+      ...JSON.parse(stored),
+    };
+  } catch {
+    return defaultSettings;
+  }
+}
+
+function getSystemTheme(): "light" | "dark" {
+  if (typeof window === "undefined") {
+    return "light";
+  }
+
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
+
 export function useReaderSettings() {
-  const [settings, setSettings] = useState<ReaderSettings>(defaultSettings);
-  const [mounted, setMounted] = useState(false);
+  const [settings, setSettings] = useState<ReaderSettings>(getInitialSettings);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-
-    if (stored) {
-      try {
-        setSettings({
-          ...defaultSettings,
-          ...JSON.parse(stored),
-        });
-      } catch {
-        setSettings(defaultSettings);
-      }
-    }
-
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted) {
-      return;
-    }
-
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-  }, [mounted, settings]);
+  }, [settings]);
 
   const resolvedTheme = useMemo(() => {
-    if (settings.theme !== "system") {
-      return settings.theme;
+    if (settings.theme === "system") {
+      return getSystemTheme();
     }
 
-    if (!mounted) {
-      return "light";
-    }
-
-    return window.matchMedia("(prefers-color-scheme: dark)").matches
-      ? "dark"
-      : "light";
-  }, [mounted, settings.theme]);
+    return settings.theme;
+  }, [settings.theme]);
 
   const updateSettings = <K extends keyof ReaderSettings>(
     key: K,
