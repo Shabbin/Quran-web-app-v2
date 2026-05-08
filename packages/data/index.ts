@@ -26,18 +26,36 @@ export function getAyahsBySurahId(surahId: number): Ayah[] {
   return ayahs.filter((ayah) => ayah.surahId === surahId);
 }
 
-export function searchAyahs(query: string): SearchResult[] {
-  const normalizedQuery = query.trim().toLowerCase();
+function normalizeArabicText(value: string): string {
+  return value
+    .replace(/[\u064B-\u065F\u0670\u06D6-\u06ED]/g, "")
+    .replace(/[إأآا]/g, "ا")
+    .replace(/ى/g, "ي")
+    .replace(/ؤ/g, "و")
+    .replace(/ئ/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
-  if (!normalizedQuery) {
+export function searchAyahs(query: string): SearchResult[] {
+  const trimmedQuery = query.trim();
+
+  if (!trimmedQuery) {
     return [];
   }
 
+  const normalizedEnglishQuery = trimmedQuery.toLowerCase();
+  const normalizedArabicQuery = normalizeArabicText(trimmedQuery);
+
   return ayahs
     .filter((ayah) => {
+      const normalizedArabicAyah = normalizeArabicText(ayah.arabic);
+      const normalizedTranslation = ayah.translation.toLowerCase();
+
       return (
-        ayah.arabic.includes(query.trim()) ||
-        ayah.translation.toLowerCase().includes(normalizedQuery)
+        normalizedArabicAyah.includes(normalizedArabicQuery) ||
+        normalizedTranslation.includes(normalizedEnglishQuery)
       );
     })
     .map((ayah) => {

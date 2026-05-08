@@ -9,6 +9,7 @@ import { BottomNav } from "./bottom-nav";
 import { IconSidebar } from "./icon-sidebar";
 import { MobileHeader } from "./mobile-header";
 import { MobileSurahDrawer } from "./mobile-surah-drawer";
+import { SearchModal } from "./search-modal";
 import { SettingsPanel } from "./settings-panel";
 import { SurahSidebar } from "./surah-sidebar";
 
@@ -19,6 +20,8 @@ type QuranAppShellProps = {
 
 export function QuranAppShell({ surahs, activeSurah }: QuranAppShellProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+
   const { settings, resolvedTheme, updateSettings } = useReaderSettings();
 
   const arabicFontClass =
@@ -39,7 +42,10 @@ export function QuranAppShell({ surahs, activeSurah }: QuranAppShellProps) {
             : "bg-[#f6f8f5] text-slate-900"
       }`}
     >
-      <MobileHeader onOpenMenu={() => setIsMobileMenuOpen(true)} />
+      <MobileHeader
+        onOpenMenu={() => setIsMobileMenuOpen(true)}
+        onOpenSearch={() => setIsSearchOpen(true)}
+      />
 
       <div className="flex min-h-screen">
         <IconSidebar />
@@ -61,6 +67,7 @@ export function QuranAppShell({ surahs, activeSurah }: QuranAppShellProps) {
               <div className="flex items-center gap-3">
                 <button
                   type="button"
+                  onClick={() => setIsSearchOpen(true)}
                   className="flex items-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-medium text-slate-600 shadow-sm transition hover:text-emerald-700 dark:bg-[#101210] dark:text-zinc-300"
                 >
                   <Search size={18} />
@@ -130,6 +137,11 @@ export function QuranAppShell({ surahs, activeSurah }: QuranAppShellProps) {
       />
 
       <BottomNav />
+
+      <SearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+      />
     </main>
   );
 }
