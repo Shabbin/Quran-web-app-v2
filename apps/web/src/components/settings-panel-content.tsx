@@ -3,206 +3,243 @@
 import type {
   ArabicFont,
   ReaderSettings,
-  ReaderTheme,
 } from "@/hooks/use-reader-settings";
 import {
   BookOpen,
   ChevronDown,
-  Moon,
-  Settings,
+  ChevronUp,
   SlidersHorizontal,
-  Sun,
   Type,
 } from "lucide-react";
+import { useState } from "react";
 
 type SettingsPanelContentProps = {
   settings: ReaderSettings;
+  resolvedTheme: "light" | "dark" | "sepia";
   onChange: <K extends keyof ReaderSettings>(
     key: K,
     value: ReaderSettings[K]
   ) => void;
 };
 
-const themes: { label: string; value: ReaderTheme; icon: typeof Sun }[] = [
-  { label: "Light", value: "light", icon: Sun },
-  { label: "Dark", value: "dark", icon: Moon },
-  { label: "Sepia", value: "sepia", icon: Sun },
-  { label: "System", value: "system", icon: Settings },
+const fonts: { label: string; value: ArabicFont }[] = [
+  { label: "Amiri Quran", value: "amiri" },
+  { label: "Scheherazade", value: "scheherazade" },
 ];
-
-const fonts: { label: string; value: ArabicFont; preview: string }[] = [
-  { label: "Amiri", value: "amiri", preview: "بِسْمِ ٱللَّهِ الرَّحْمَٰنِ الرَّحِيمِ" },
-  {
-    label: "Scheherazade",
-    value: "scheherazade",
-    preview: "بِسْمِ ٱللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-  },
-];
-
-const previewFontFamily = {
-  amiri: "var(--font-amiri), serif",
-  scheherazade: "var(--font-scheherazade), serif",
-} satisfies Record<ArabicFont, string>;
 
 export function SettingsPanelContent({
   settings,
+  resolvedTheme,
   onChange,
 }: SettingsPanelContentProps) {
+  const [isReadingOpen, setIsReadingOpen] = useState(true);
+  const [isFontOpen, setIsFontOpen] = useState(true);
+
+  const isDark = resolvedTheme === "dark";
+  const isSepia = resolvedTheme === "sepia";
+
+  const accent = isSepia ? "#a07a50" : "#3d8738";
+
+  const headingTextClass = isDark
+    ? "text-zinc-100"
+    : isSepia
+      ? "text-[#4f3c28]"
+      : "text-slate-800";
+
+  const bodyTextClass = isDark
+    ? "text-zinc-500"
+    : isSepia
+      ? "text-[#8f7a63]"
+      : "text-slate-500";
+
+  const labelTextClass = isDark
+    ? "text-zinc-200"
+    : isSepia
+      ? "text-[#4f3c28]"
+      : "text-slate-700";
+
+  const selectClass = isDark
+    ? "bg-[#151715] text-zinc-200"
+    : isSepia
+      ? "bg-[#f1eadc] text-[#4f3c28]"
+      : "bg-[#f3f5f3] text-slate-700";
+
+  const supportCardClass = isDark
+    ? "border-emerald-900/30 bg-emerald-950/20"
+    : isSepia
+      ? "border-[#dfcfb3] bg-[#eee3d1]"
+      : "border-emerald-100 bg-[#f1f8ef]";
+
+  const supportButtonClass = isSepia
+    ? "bg-[#a07a50] hover:bg-[#8f6d49]"
+    : "bg-[#3d8738] hover:bg-[#347730]";
+
+  const readingIconClass = isDark
+    ? "text-zinc-400"
+    : isSepia
+      ? "text-[#a07a50]"
+      : "text-[#7d918b]";
+
   return (
     <div className="space-y-6">
       <section>
-        <div className="mb-4 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => setIsReadingOpen((current) => !current)}
+          className="flex w-full items-center justify-between"
+        >
           <div className="flex items-center gap-3">
-            <BookOpen size={19} className="text-slate-500 dark:text-zinc-400" />
-            <h3 className="font-semibold text-slate-800 dark:text-zinc-100">
+            <BookOpen size={20} className={readingIconClass} />
+
+            <h3 className={`text-[15px] font-semibold ${headingTextClass}`}>
               Reading Settings
             </h3>
           </div>
-          <ChevronDown size={18} className="text-slate-500" />
-        </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          {themes.map((theme) => {
-            const Icon = theme.icon;
-            const isActive = settings.theme === theme.value;
+          {isReadingOpen ? (
+            <ChevronUp size={18} style={{ color: accent }} />
+          ) : (
+            <ChevronDown size={18} style={{ color: accent }} />
+          )}
+        </button>
 
-            return (
-              <button
-                key={theme.value}
-                type="button"
-                onClick={() => onChange("theme", theme.value)}
-                className={`flex items-center gap-2 rounded-2xl px-3 py-3 text-sm font-medium transition ${
-                  isActive
-                    ? "bg-emerald-600 text-white shadow-sm"
-                    : "bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 dark:bg-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800"
-                }`}
-              >
-                <Icon size={16} />
-                {theme.label}
-              </button>
-            );
-          })}
-        </div>
+        {isReadingOpen ? (
+          <p className={`mt-4 text-[13px] leading-6 ${bodyTextClass}`}>
+            Translation view is active. Use the font controls below to adjust
+            your reading experience.
+          </p>
+        ) : null}
       </section>
 
       <section>
-        <div className="mb-5 flex items-center gap-3">
-          <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-600 text-white">
-            <Type size={15} />
-          </span>
-          <h3 className="font-semibold text-emerald-700 dark:text-emerald-500">
-            Font Settings
-          </h3>
-        </div>
-
-        <div className="space-y-6">
-          <label className="block">
-            <div className="mb-3 flex items-center justify-between text-sm">
-              <span className="font-medium text-slate-700 dark:text-zinc-200">
-                Arabic Font Size
-              </span>
-              <span className="font-semibold text-emerald-700">
-                {settings.arabicFontSize}
-              </span>
-            </div>
-            <input
-              type="range"
-              min="26"
-              max="42"
-              value={settings.arabicFontSize}
-              onChange={(event) =>
-                onChange("arabicFontSize", Number(event.target.value))
-              }
-              className="w-full accent-emerald-700"
-            />
-            <div className="mt-2 flex justify-between text-xs text-slate-400 dark:text-zinc-600">
-              <span>Compact</span>
-              <span>Comfortable</span>
-              <span>Large</span>
-            </div>
-          </label>
-
-          <label className="block">
-            <div className="mb-3 flex items-center justify-between text-sm">
-              <span className="font-medium text-slate-700 dark:text-zinc-200">
-                Translation Font Size
-              </span>
-              <span className="font-semibold text-emerald-700">
-                {settings.translationFontSize}
-              </span>
-            </div>
-            <input
-              type="range"
-              min="14"
-              max="20"
-              value={settings.translationFontSize}
-              onChange={(event) =>
-                onChange("translationFontSize", Number(event.target.value))
-              }
-              className="w-full accent-emerald-700"
-            />
-            <div className="mt-2 flex justify-between text-xs text-slate-400 dark:text-zinc-600">
-              <span>Small</span>
-              <span>Balanced</span>
-              <span>Readable</span>
-            </div>
-          </label>
-
-          <label className="block">
-            <span className="mb-3 block text-sm font-medium text-slate-700 dark:text-zinc-200">
-              Arabic Font Face
-            </span>
-            <select
-              value={settings.arabicFont}
-              onChange={(event) =>
-                onChange("arabicFont", event.target.value as ArabicFont)
-              }
-              className="w-full rounded-2xl border-0 bg-slate-100 px-4 py-4 text-sm font-medium text-slate-700 outline-none ring-1 ring-transparent transition focus:ring-emerald-400 dark:bg-zinc-900 dark:text-zinc-200"
+        <button
+          type="button"
+          onClick={() => setIsFontOpen((current) => !current)}
+          className="mb-5 flex w-full items-center justify-between"
+        >
+          <div className="flex items-center gap-3">
+            <span
+              className="flex h-6 w-6 items-center justify-center rounded-md text-white"
+              style={{ backgroundColor: accent }}
             >
-              {fonts.map((font) => (
-                <option key={font.value} value={font.value}>
-                  {font.label}
-                </option>
-              ))}
-            </select>
+              <Type size={15} />
+            </span>
 
-            <div className="mt-3 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-right dark:border-emerald-900/40 dark:bg-emerald-950/20">
-              <p
-                dir="rtl"
-                className="text-slate-900 dark:text-zinc-100"
-                style={{
-                  fontFamily: previewFontFamily[settings.arabicFont],
-                  fontSize: 24,
-                  lineHeight: 2,
-                }}
-              >
-                {
-                  fonts.find((font) => font.value === settings.arabicFont)
-                    ?.preview
+            <h3
+              className="text-[15px] font-semibold"
+              style={{ color: accent }}
+            >
+              Font Settings
+            </h3>
+          </div>
+
+          {isFontOpen ? (
+            <ChevronUp size={18} style={{ color: accent }} />
+          ) : (
+            <ChevronDown size={18} style={{ color: accent }} />
+          )}
+        </button>
+
+        {isFontOpen ? (
+          <div className="space-y-6">
+            <label className="block">
+              <div className="mb-2.5 flex items-center justify-between">
+                <span className={`text-[14px] font-medium ${labelTextClass}`}>
+                  Arabic Font Size
+                </span>
+                <span
+                  className="text-[13px] font-bold"
+                  style={{ color: accent }}
+                >
+                  {settings.arabicFontSize}
+                </span>
+              </div>
+
+              <input
+                type="range"
+                min="26"
+                max="42"
+                value={settings.arabicFontSize}
+                onChange={(event) =>
+                  onChange("arabicFontSize", Number(event.target.value))
                 }
-              </p>
-              <p className="mt-2 text-left text-xs font-medium text-emerald-700 dark:text-emerald-500">
-                Preview: {settings.arabicFont === "amiri" ? "Amiri" : "Scheherazade"}
-              </p>
-            </div>
-          </label>
-        </div>
+                style={{ accentColor: accent }}
+                className="w-full"
+              />
+            </label>
+
+            <label className="block">
+              <div className="mb-2.5 flex items-center justify-between">
+                <span className={`text-[14px] font-medium ${labelTextClass}`}>
+                  Translation Font Size
+                </span>
+                <span
+                  className="text-[13px] font-bold"
+                  style={{ color: accent }}
+                >
+                  {settings.translationFontSize}
+                </span>
+              </div>
+
+              <input
+                type="range"
+                min="14"
+                max="32"
+                value={settings.translationFontSize}
+                onChange={(event) =>
+                  onChange("translationFontSize", Number(event.target.value))
+                }
+                style={{ accentColor: accent }}
+                className="w-full"
+              />
+            </label>
+
+            <label className="block">
+              <span
+                className={`mb-2.5 block text-[14px] font-medium ${labelTextClass}`}
+              >
+                Arabic Font Face
+              </span>
+
+              <select
+                value={settings.arabicFont}
+                onChange={(event) =>
+                  onChange("arabicFont", event.target.value as ArabicFont)
+                }
+                className={`w-full rounded-xl border-0 px-4 py-3.5 text-[14px] font-medium outline-none ring-1 ring-transparent transition focus:ring-emerald-300 ${selectClass}`}
+              >
+                {fonts.map((font) => (
+                  <option key={font.value} value={font.value}>
+                    {font.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        ) : null}
       </section>
 
-      <section className="rounded-[24px] border border-emerald-100 bg-emerald-50 p-5 dark:border-emerald-900/40 dark:bg-emerald-950/30">
-        <div className="mb-3 flex items-center gap-2">
-          <SlidersHorizontal size={18} className="text-emerald-700" />
-          <h3 className="font-bold text-slate-800 dark:text-zinc-100">
+      <section className={`rounded-[18px] border p-4 ${supportCardClass}`}>
+        <div className="mb-2.5 flex items-start gap-2">
+          <SlidersHorizontal
+            size={18}
+            className="mt-1 shrink-0"
+            style={{ color: accent }}
+          />
+
+          <h3 className={`text-[15px] font-bold leading-6 ${headingTextClass}`}>
             Help spread the knowledge of Islam
           </h3>
         </div>
-        <p className="text-sm leading-7 text-slate-600 dark:text-zinc-400">
+
+        <p className={`text-[13px] leading-6 ${bodyTextClass}`}>
           Your regular support helps us reach our religious brothers and sisters
           with the message of Islam.
         </p>
+
         <button
           type="button"
-          className="mt-4 w-full rounded-2xl bg-emerald-700 px-4 py-3 text-sm font-bold text-white transition hover:bg-emerald-800"
+          className={`mt-4 w-full rounded-lg px-4 py-3 text-[13px] font-bold text-white transition ${supportButtonClass}`}
         >
           Support Us
         </button>

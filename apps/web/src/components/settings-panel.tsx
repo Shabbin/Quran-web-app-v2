@@ -5,33 +5,72 @@ import { SettingsPanelContent } from "./settings-panel-content";
 
 type SettingsPanelProps = {
   settings: ReaderSettings;
+  resolvedTheme: "light" | "dark" | "sepia";
   onChange: <K extends keyof ReaderSettings>(
     key: K,
     value: ReaderSettings[K]
   ) => void;
 };
 
-export function SettingsPanel({ settings, onChange }: SettingsPanelProps) {
+export function SettingsPanel({
+  settings,
+  resolvedTheme,
+  onChange,
+}: SettingsPanelProps) {
+  const isDark = resolvedTheme === "dark";
+  const isSepia = resolvedTheme === "sepia";
+
+  const panelClass = isDark
+    ? "border-[#222722] bg-[#101210]"
+    : isSepia
+      ? "border-[#e8dcc9] bg-[#f6f1e7]"
+      : "border-[#e7eee8] bg-white";
+
+  const tabWrapperClass = isDark
+    ? "bg-[#181b18]"
+    : isSepia
+      ? "bg-[#f3ecdf]"
+      : "bg-[#f3f5f3]";
+
+  const activeTabClass = isDark
+    ? "bg-[#101210] text-zinc-100"
+    : isSepia
+      ? "bg-[#fbf8f0] text-[#4f3c28]"
+      : "bg-white text-slate-800";
+
+  const inactiveTabClass = isDark
+    ? "text-zinc-500"
+    : isSepia
+      ? "text-[#8f7a63]"
+      : "text-slate-500";
+
   return (
-    <aside className="hidden h-screen w-[330px] shrink-0 border-l border-emerald-100 bg-white p-5 dark:border-zinc-800 dark:bg-[#101210] xl:block">
-      <div className="mb-7 rounded-[26px] bg-slate-100 p-1 dark:bg-zinc-900">
-        <div className="grid grid-cols-2 text-sm font-semibold">
+    <aside
+      className={`fixed right-0 top-[64px] z-40 hidden h-[calc(100vh-64px)] w-[330px] border-l px-6 py-5 xl:block ${panelClass}`}
+    >
+      <div className={`mb-7 rounded-[22px] p-1 ${tabWrapperClass}`}>
+        <div className="grid grid-cols-2 text-[14px] font-semibold">
           <button
             type="button"
-            className="rounded-2xl bg-white py-3 text-slate-800 shadow-sm dark:bg-[#171a17] dark:text-zinc-100"
+            className={`rounded-[18px] py-2.5 shadow-sm ${activeTabClass}`}
           >
             Translation
           </button>
+
           <button
             type="button"
-            className="rounded-2xl py-3 text-slate-500 dark:text-zinc-500"
+            className={`rounded-[18px] py-2.5 ${inactiveTabClass}`}
           >
             Reading
           </button>
         </div>
       </div>
 
-      <SettingsPanelContent settings={settings} onChange={onChange} />
+      <SettingsPanelContent
+        settings={settings}
+        resolvedTheme={resolvedTheme}
+        onChange={onChange}
+      />
     </aside>
   );
 }

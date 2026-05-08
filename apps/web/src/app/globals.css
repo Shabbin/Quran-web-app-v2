@@ -11,10 +11,14 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
   margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: var(--background);
   color: var(--foreground);
 }
@@ -27,4 +31,68 @@ select {
 
 .arabic-text {
   font-family: var(--font-amiri), serif;
+}
+
+/* Hide native desktop page scrollbar.
+   PageScrollbar draws a custom right-edge scrollbar. */
+@media (min-width: 1024px) {
+  html,
+  body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar,
+  ::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+}
+
+/* Keep normal native scrollbar on mobile/tablet */
+@media (max-width: 1023px) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #3d8738 transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #3d8738;
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #347730;
+  }
+
+  ::-webkit-scrollbar-button {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+    background: transparent !important;
+  }
+}
+
+/* Hide native Surah sidebar scrollbar only.
+   SurahSidebar draws a custom draggable green thumb. */
+.surah-sidebar-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.surah-sidebar-scroll::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
 }
