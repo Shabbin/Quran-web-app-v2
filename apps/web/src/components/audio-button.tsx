@@ -7,11 +7,33 @@ import { getAudioUrl } from "@quran-web-app/data";
 type AudioButtonProps = {
   surahId: number;
   ayahNumber: number;
+  resolvedTheme: "light" | "dark" | "sepia";
 };
 
-export function AudioButton({ surahId, ayahNumber }: AudioButtonProps) {
+export function AudioButton({
+  surahId,
+  ayahNumber,
+  resolvedTheme,
+}: AudioButtonProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const isDark = resolvedTheme === "dark";
+  const isSepia = resolvedTheme === "sepia";
+
+  const buttonClass = isDark
+    ? "text-zinc-400 hover:bg-zinc-900 hover:text-emerald-400"
+    : isSepia
+      ? "text-[#9b7550] hover:bg-[#ead9be] hover:text-[#8a6542]"
+      : "text-[#7f928d] hover:bg-[#f2f6f2] hover:text-[#3d8738]";
+
+  const iconClass = isPlaying
+    ? isDark
+      ? "text-emerald-400"
+      : isSepia
+        ? "text-[#8a6542]"
+        : "text-[#3d8738]"
+    : "";
 
   const handleToggle = async () => {
     if (!audioRef.current) {
@@ -33,10 +55,14 @@ export function AudioButton({ surahId, ayahNumber }: AudioButtonProps) {
     <button
       type="button"
       onClick={handleToggle}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-emerald-600 text-white shadow-sm transition hover:bg-emerald-700"
+      className={`inline-flex h-8 w-8 items-center justify-center rounded-full transition ${buttonClass}`}
       aria-label={isPlaying ? "Pause ayah audio" : "Play ayah audio"}
     >
-      {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+      {isPlaying ? (
+        <Pause size={17} className={iconClass} />
+      ) : (
+        <Play size={17} className={iconClass} />
+      )}
     </button>
   );
 }
