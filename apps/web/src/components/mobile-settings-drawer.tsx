@@ -1,12 +1,13 @@
 "use client";
 
 import type { ReaderSettings } from "@/hooks/use-reader-settings";
-import { X } from "lucide-react";
+import { Settings, X } from "lucide-react";
 import { SettingsPanelContent } from "./settings-panel-content";
 
 type MobileSettingsDrawerProps = {
   isOpen: boolean;
   settings: ReaderSettings;
+  resolvedTheme: "light" | "dark" | "sepia";
   onChange: <K extends keyof ReaderSettings>(
     key: K,
     value: ReaderSettings[K]
@@ -17,6 +18,7 @@ type MobileSettingsDrawerProps = {
 export function MobileSettingsDrawer({
   isOpen,
   settings,
+  resolvedTheme,
   onChange,
   onClose,
 }: MobileSettingsDrawerProps) {
@@ -24,37 +26,66 @@ export function MobileSettingsDrawer({
     return null;
   }
 
+  const isDark = resolvedTheme === "dark";
+  const isSepia = resolvedTheme === "sepia";
+
+  const accent = isSepia ? "#a07a50" : "#3d8738";
+
+  const drawerClass = isDark
+    ? "bg-[#090b09] text-zinc-100"
+    : isSepia
+      ? "bg-[#f6f1e7] text-[#4f3c28]"
+      : "bg-white text-slate-900";
+
+  const borderClass = isDark
+    ? "border-[#222722]"
+    : isSepia
+      ? "border-[#e8dcc9]"
+      : "border-[#e7eee8]";
+
+  const titleClass = isDark
+    ? "text-zinc-100"
+    : isSepia
+      ? "text-[#4f3c28]"
+      : "text-slate-900";
+
+  const closeClass = isDark
+    ? "text-zinc-400 hover:bg-[#151a15]"
+    : isSepia
+      ? "text-[#8f7a63] hover:bg-[#f1eadc]"
+      : "text-slate-500 hover:bg-slate-100";
+
   return (
     <div className="fixed inset-0 z-[75] lg:hidden">
-      <button
-        type="button"
-        className="absolute inset-0 bg-black/45"
-        onClick={onClose}
-        aria-label="Close settings overlay"
-      />
+      <section className={`h-full overflow-y-auto ${drawerClass}`}>
+        <header
+          className={`flex h-[58px] items-center justify-between border-b px-4 ${borderClass}`}
+        >
+          <div className="flex items-center gap-3">
+            <Settings size={20} style={{ color: accent }} />
 
-      <section className="absolute bottom-0 left-0 right-0 max-h-[88vh] overflow-y-auto rounded-t-[30px] bg-white p-5 shadow-2xl dark:bg-[#101210]">
-        <header className="mb-5 flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-bold text-slate-900 dark:text-zinc-100">
-              Reading Settings
+            <h2 className={`text-[16px] font-bold ${titleClass}`}>
+              Settings
             </h2>
-            <p className="mt-1 text-sm text-slate-500 dark:text-zinc-500">
-              Customize theme, Arabic font, and text size
-            </p>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600 dark:bg-zinc-900 dark:text-zinc-300"
+            className={`flex h-8 w-8 items-center justify-center rounded-full transition ${closeClass}`}
             aria-label="Close settings"
           >
             <X size={18} />
           </button>
         </header>
 
-        <SettingsPanelContent settings={settings} onChange={onChange} />
+        <div className="px-4 pb-8 pt-5">
+          <SettingsPanelContent
+            settings={settings}
+            resolvedTheme={resolvedTheme}
+            onChange={onChange}
+          />
+        </div>
       </section>
     </div>
   );

@@ -1,54 +1,116 @@
 "use client";
 
-import { Menu, Search, Settings } from "lucide-react";
+import type {
+  ReaderSettings,
+  ReaderTheme,
+} from "@/hooks/use-reader-settings";
+import { Menu, Moon, Search, Settings, Sun } from "lucide-react";
 
 type MobileHeaderProps = {
+  settings: ReaderSettings;
+  resolvedTheme: "light" | "dark" | "sepia";
+  onChange: <K extends keyof ReaderSettings>(
+    key: K,
+    value: ReaderSettings[K]
+  ) => void;
   onOpenMenu: () => void;
   onOpenSearch: () => void;
   onOpenSettings: () => void;
 };
 
+function getNextTheme(currentTheme: ReaderTheme): ReaderTheme {
+  if (currentTheme === "light") return "dark";
+  if (currentTheme === "dark") return "sepia";
+  return "light";
+}
+
 export function MobileHeader({
+  settings,
+  resolvedTheme,
+  onChange,
   onOpenMenu,
   onOpenSearch,
   onOpenSettings,
 }: MobileHeaderProps) {
-  return (
-    <header className="sticky top-0 z-30 flex items-center justify-between border-b border-emerald-100 bg-white/95 px-4 py-3 backdrop-blur dark:border-zinc-800 dark:bg-[#090b09]/95 lg:hidden">
-      <button
-        type="button"
-        onClick={onOpenMenu}
-        className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 dark:bg-zinc-900 dark:text-zinc-300"
-        aria-label="Open surah menu"
-      >
-        <Menu size={20} />
-      </button>
+  const isDark = resolvedTheme === "dark";
+  const isSepia = resolvedTheme === "sepia";
 
-      <div className="text-center">
-        <p className="text-base font-bold text-slate-900 dark:text-zinc-100">
-          Quran Mazid
-        </p>
-        <p className="text-xs text-slate-500 dark:text-zinc-500">
-          Al Quran Reader
-        </p>
+  const headerClass = isDark
+    ? "border-[#222722] bg-[#090b09]"
+    : isSepia
+      ? "border-[#e8dcc9] bg-[#f6f1e7]"
+      : "border-[#e7eee8] bg-white";
+
+  const titleClass = isDark
+    ? "text-zinc-100"
+    : isSepia
+      ? "text-[#4f3c28]"
+      : "text-slate-900";
+
+  const subtitleClass = isDark
+    ? "text-zinc-500"
+    : isSepia
+      ? "text-[#907658]"
+      : "text-slate-500";
+
+  const iconButtonClass = isDark
+    ? "bg-[#101510] text-emerald-400 hover:bg-[#182018]"
+    : isSepia
+      ? "bg-[#f1eadc] text-[#a07a50] hover:bg-[#eadcc6]"
+      : "bg-[#f3f7f1] text-[#3d8738] hover:bg-emerald-100";
+
+  const ThemeIcon = resolvedTheme === "dark" ? Moon : Sun;
+
+  return (
+    <header
+      className={`sticky top-0 z-30 flex h-[64px] items-center justify-between border-b px-3 lg:hidden ${headerClass}`}
+    >
+      <div className="flex min-w-0 items-center gap-3">
+        <button
+          type="button"
+          onClick={onOpenMenu}
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition ${iconButtonClass}`}
+          aria-label="Open surah menu"
+        >
+          <Menu size={18} />
+        </button>
+
+        <div className="min-w-0">
+          <p className={`truncate text-[14px] font-bold leading-5 ${titleClass}`}>
+            Quran Mazid
+          </p>
+          <p className={`truncate text-[9px] leading-3 ${subtitleClass}`}>
+            Read, Study, and Learn The Quran
+          </p>
+        </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2">
         <button
           type="button"
           onClick={onOpenSearch}
-          className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 dark:bg-zinc-900 dark:text-zinc-300"
-          aria-label="Search"
+          className={`flex h-9 w-9 items-center justify-center rounded-full transition ${iconButtonClass}`}
+          aria-label="Search Quran"
         >
-          <Search size={18} />
+          <Search size={17} />
         </button>
+
+        <button
+          type="button"
+          onClick={() => onChange("theme", getNextTheme(settings.theme))}
+          className={`flex h-9 w-9 items-center justify-center rounded-full transition ${iconButtonClass}`}
+          aria-label="Change theme"
+        >
+          <ThemeIcon size={17} />
+        </button>
+
         <button
           type="button"
           onClick={onOpenSettings}
-          className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 dark:bg-zinc-900 dark:text-zinc-300"
-          aria-label="Settings"
+          className={`flex h-9 w-9 items-center justify-center rounded-full transition ${iconButtonClass}`}
+          aria-label="Open settings"
         >
-          <Settings size={18} />
+          <Settings size={17} />
         </button>
       </div>
     </header>
