@@ -3,7 +3,8 @@
 import type { ReaderPage, Surah } from "@quran-web-app/data";
 import { Search, X } from "lucide-react";
 import Image from "next/image";
-import Link from "next/link";
+import { MobilePageList } from "./mobile-page-list";
+import { MobileSurahList } from "./mobile-surah-list";
 
 type SidebarMode = "surah" | "juz" | "page";
 
@@ -236,114 +237,28 @@ export function MobileSurahDrawer({
 
         <div className="h-[calc(100vh-178px)] overflow-y-auto px-3 pb-5">
           {activeSidebarMode === "surah" ? (
-            <div className="space-y-2">
-              {surahs.map((surah) => {
-                const isActive = surah.id === activeSurahId;
-
-                return (
-                  <Link
-                    key={surah.id}
-                    href={`/${surah.id}`}
-                    onClick={() => {
-                      onChangeSidebarMode("surah");
-                      onClose();
-                    }}
-                    className={`flex items-center gap-3 rounded-[14px] px-3 py-2.5 transition ${getCardClass(
-                      isActive
-                    )}`}
-                  >
-                    <span className="relative flex h-10 w-10 shrink-0 items-center justify-center">
-                      <span
-                        className={`absolute h-8 w-8 rotate-45 rounded-[10px] ${getDiamondClass(
-                          isActive
-                        )}`}
-                        style={{
-                          backgroundColor: isActive ? accent : undefined,
-                        }}
-                      />
-                      <span
-                        className={`relative text-[13px] font-bold ${getNumberClass(
-                          isActive
-                        )}`}
-                      >
-                        {surah.id}
-                      </span>
-                    </span>
-
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13px] font-bold leading-5">
-                        {surah.englishName}
-                      </span>
-                      <span
-                        className={`block truncate text-[11px] leading-4 ${subtitleClass}`}
-                      >
-                        {surah.englishNameTranslation}
-                      </span>
-                    </span>
-
-                    <span
-                      className={`arabic-text shrink-0 text-right text-[18px] leading-none ${subtitleClass}`}
-                    >
-                      {surah.arabicName}
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
+            <MobileSurahList
+              surahs={surahs}
+              activeSurahId={activeSurahId}
+              accent={accent}
+              subtitleClass={subtitleClass}
+              getCardClass={getCardClass}
+              getDiamondClass={getDiamondClass}
+              getNumberClass={getNumberClass}
+              onChangeSidebarMode={onChangeSidebarMode}
+              onClose={onClose}
+            />
           ) : activeSidebarMode === "page" ? (
-            <div className="space-y-2">
-              {readerPages.map((readerPage) => {
-                const isActive =
-                  readerPage.pageNumber === activeReaderPageNumber;
-
-                return (
-                  <button
-                    key={readerPage.pageNumber}
-                    type="button"
-                    onClick={() => onSelectReaderPage(readerPage.pageNumber)}
-                    className={`flex w-full items-center gap-3 rounded-[14px] px-3 py-2.5 text-left transition ${getCardClass(
-                      isActive
-                    )}`}
-                  >
-                    <span className="relative flex h-10 w-10 shrink-0 items-center justify-center">
-                      <span
-                        className={`absolute h-8 w-8 rotate-45 rounded-[10px] ${getDiamondClass(
-                          isActive
-                        )}`}
-                        style={{
-                          backgroundColor: isActive ? accent : undefined,
-                        }}
-                      />
-                      <span
-                        className={`relative text-[11px] font-bold ${getNumberClass(
-                          isActive
-                        )}`}
-                      >
-                        {readerPage.pageNumber}
-                      </span>
-                    </span>
-
-                    <span className="min-w-0 flex-1">
-                      <span className="block truncate text-[13px] font-bold leading-5">
-                        Page {readerPage.pageNumber}
-                      </span>
-                      <span
-                        className={`block truncate text-[11px] leading-4 ${subtitleClass}`}
-                      >
-                        {readerPage.surah.englishName} · Ayah{" "}
-                        {readerPage.startAyah}-{readerPage.endAyah}
-                      </span>
-                    </span>
-
-                    <span
-                      className={`arabic-text shrink-0 text-right text-[18px] leading-none ${subtitleClass}`}
-                    >
-                      {readerPage.surah.arabicName}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
+            <MobilePageList
+              readerPages={readerPages}
+              activeReaderPageNumber={activeReaderPageNumber}
+              accent={accent}
+              subtitleClass={subtitleClass}
+              getCardClass={getCardClass}
+              getDiamondClass={getDiamondClass}
+              getNumberClass={getNumberClass}
+              onSelectReaderPage={onSelectReaderPage}
+            />
           ) : (
             <div className={`px-3 py-8 text-center text-sm ${emptyTextClass}`}>
               Juz navigation can be added later.
