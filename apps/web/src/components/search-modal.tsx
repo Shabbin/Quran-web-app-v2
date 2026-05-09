@@ -1,30 +1,272 @@
 "use client";
 
+import type { ReaderPage, SearchResult, Surah } from "@quran-web-app/data";
 import { searchAyahs } from "@quran-web-app/data";
-import { Search, X } from "lucide-react";
+import { BookOpen, FileText, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 
 type SearchModalProps = {
   isOpen: boolean;
   resolvedTheme: "light" | "dark" | "sepia";
+  surahs: Surah[];
+  readerPages: ReaderPage[];
+  onSelectReaderPage: (pageNumber: number) => void;
   onClose: () => void;
 };
+
+type SurahSearchResult = {
+  type: "surah";
+  surah: Surah;
+};
+
+type PageSearchResult = {
+  type: "page";
+  page: ReaderPage;
+};
+
+function normalizeArabicText(value: string) {
+  return value
+    .replace(/[\u0610-\u061A\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g, "")
+    .replace(/[إأآٱا]/g, "ا")
+    .replace(/وة/g, "اة")
+    .replace(/ى/g, "ي")
+    .replace(/ؤ/g, "و")
+    .replace(/ئ/g, "ي")
+    .replace(/ة/g, "ه")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeSearchValue(value: string) {
+  return normalizeArabicText(value)
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9\u0600-\u06ff]/g, "");
+}
+
+function removeNavigationWords(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/\bsurah\b/g, "")
+    .replace(/\bsura\b/g, "")
+    .replace(/\bchapter\b/g, "")
+    .replace(/\bpage\b/g, "")
+    .replace(/\bpg\b/g, "")
+    .replace(/\bayah\b/g, "")
+    .replace(/\bverse\b/g, "")
+    .replace(/\bno\b/g, "")
+    .replace(/\bnumber\b/g, "")
+    .trim();
+}
+
+function getQueryNumber(query: string) {
+  const match = query.match(/\d+/);
+  return match ? Number(match[0]) : null;
+}
+
+function matchesLoose(values: Array<string | number>, query: string) {
+  const cleanedQuery = removeNavigationWords(query);
+  const normalizedQuery = normalizeSearchValue(cleanedQuery);
+
+  if (!normalizedQuery) {
+    return false;
+  }
+
+  return values.some((value) => {
+    const normalizedValue = normalizeSearchValue(String(value));
+    return (
+      normalizedValue.includes(normalizedQuery) ||
+      normalizedQuery.includes(normalizedValue)
+    );
+  });
+}
+
+function isPageQuery(query: string) {
+  return /\b(page|pg)\b/i.test(query);
+}
+
+function isSurahQuery(query: string) {
+  return /\b(surah|sura|chapter)\b/i.test(query);
+}
+
+function getSurahResults(surahs: Surah[], query: string): SurahSearchResult[] {
+  const trimmedQuery = query.trim();
+  const queryNumber = getQueryNumber(trimmedQuery);
+  const explicitlySurah = isSurahQuery(trimmedQuery);
+
+  if (!trimmedQuery) {
+    return [];
+  }
+
+  return surahs
+    .map((surah) => {
+      let score = 0;
+
+      const searchableValues = [
+        surah.id,
+        String(surah.id).padStart(2, "0"),
+        `surah ${surah.id}`,
+        `chapter ${surah.id}`,
+        surah.englishName,
+        surah.englishName.replace(/^Al-/i, ""),
+        surah.englishName.replace(/-/g, " "),
+        surah.englishNameTranslation,
+        surah.arabicName,
+      ];
+
+      if (queryNumber === surah.id) {
+        score += explicitlySurah ? 120 : 80;
+      }
+
+      if (matchesLoose(searchableValues, trimmedQuery)) {
+        score += 60;
+      }
+
+      const normalizedQuery = normalizeSearchValue(removeNavigationWords(trimmedQuery));
+      const normalizedEnglishName = normalizeSearchValue(surah.englishName);
+      const normalizedEnglishNameWithoutAl = normalizeSearchValue(
+        surah.englishName.replace(/^Al-/i, "")
+      );
+
+      if (
+        normalizedQuery === normalizedEnglishName ||
+        normalizedQuery === normalizedEnglishNameWithoutAl
+      ) {
+        score += 80;
+      }
+
+      return {
+        result: {
+          type: "surah" as const,
+          surah,
+        },
+        score,
+      };
+    })
+    .filter((item) => item.score > 0)
+    .sort((a, b) => b.score - a.score || a.result.surah.id - b.result.surah.id)
+    .slice(0, 8)
+    .map((item) => item.result);
+}
+
+function getPageResults(
+  readerPages: ReaderPage[],
+  query: string
+): PageSearchResult[] {
+  const trimmedQuery = query.trim();
+  const queryNumber = getQueryNumber(trimmedQuery);
+  const explicitlyPage = isPageQuery(trimmedQuery);
+
+  if (!trimmedQuery) {
+    return [];
+  }
+
+  return readerPages
+    .map((page) => {
+      let score = 0;
+
+      const searchableValues = [
+        page.pageNumber,
+        String(page.pageNumber).padStart(2, "0"),
+        `page ${page.pageNumber}`,
+        `pg ${page.pageNumber}`,
+        page.surah.id,
+        page.surah.englishName,
+        page.surah.englishName.replace(/^Al-/i, ""),
+        page.surah.englishName.replace(/-/g, " "),
+        page.surah.englishNameTranslation,
+        page.surah.arabicName,
+        page.startAyah,
+        page.endAyah,
+        `ayah ${page.startAyah}`,
+        `ayah ${page.endAyah}`,
+        `ayah ${page.startAyah}-${page.endAyah}`,
+        `${page.startAyah}-${page.endAyah}`,
+      ];
+
+      if (queryNumber === page.pageNumber) {
+        score += explicitlyPage ? 120 : 55;
+      }
+
+      if (matchesLoose(searchableValues, trimmedQuery)) {
+        score += 45;
+      }
+
+      return {
+        result: {
+          type: "page" as const,
+          page,
+        },
+        score,
+      };
+    })
+    .filter((item) => item.score > 0)
+    .sort(
+      (a, b) => b.score - a.score || a.result.page.pageNumber - b.result.page.pageNumber
+    )
+    .slice(0, 8)
+    .map((item) => item.result);
+}
+
+function getAyahResults(query: string): SearchResult[] {
+  const trimmedQuery = query.trim();
+
+  if (!trimmedQuery) {
+    return [];
+  }
+
+  const ayahReferenceMatch = trimmedQuery.match(/^(\d{1,3})\s*[:.-]\s*(\d{1,3})$/);
+
+  const results = searchAyahs(trimmedQuery);
+
+  if (!ayahReferenceMatch) {
+    return results.slice(0, 30);
+  }
+
+  const surahId = Number(ayahReferenceMatch[1]);
+  const ayahNumber = Number(ayahReferenceMatch[2]);
+
+  const exactResults = results.filter(
+    ({ ayah }) => ayah.surahId === surahId && ayah.numberInSurah === ayahNumber
+  );
+
+  const otherResults = results.filter(
+    ({ ayah }) => !(ayah.surahId === surahId && ayah.numberInSurah === ayahNumber)
+  );
+
+  return [...exactResults, ...otherResults].slice(0, 30);
+}
 
 export function SearchModal({
   isOpen,
   resolvedTheme,
+  surahs,
+  readerPages,
+  onSelectReaderPage,
   onClose,
 }: SearchModalProps) {
   const [query, setQuery] = useState("");
 
-  const results = useMemo(() => {
-    return searchAyahs(query).slice(0, 30);
+  const surahResults = useMemo(() => {
+    return getSurahResults(surahs, query);
+  }, [surahs, query]);
+
+  const pageResults = useMemo(() => {
+    return getPageResults(readerPages, query);
+  }, [readerPages, query]);
+
+  const ayahResults = useMemo(() => {
+    return getAyahResults(query);
   }, [query]);
 
   if (!isOpen) {
     return null;
   }
+
+  const hasQuery = Boolean(query.trim());
+  const hasResults =
+    surahResults.length > 0 || pageResults.length > 0 || ayahResults.length > 0;
 
   const isDark = resolvedTheme === "dark";
   const isSepia = resolvedTheme === "sepia";
@@ -121,6 +363,12 @@ export function SearchModal({
       ? "text-[#6f5b49]"
       : "text-slate-600";
 
+  const badgeClass = isDark
+    ? "bg-[#0d120d] text-zinc-400"
+    : isSepia
+      ? "bg-[#f1eadc] text-[#8f7a63]"
+      : "bg-emerald-50 text-emerald-700";
+
   return (
     <div
       className={`fixed inset-0 z-[70] flex items-end justify-center p-0 sm:items-center sm:p-6 ${overlayClass}`}
@@ -135,13 +383,15 @@ export function SearchModal({
       <section
         className={`relative max-h-[88vh] w-full overflow-hidden rounded-t-[22px] shadow-2xl sm:max-w-2xl sm:rounded-[30px] ${modalClass}`}
       >
-        <header className={`flex items-start justify-between border-b p-4 ${borderClass}`}>
+        <header
+          className={`flex items-start justify-between border-b p-4 ${borderClass}`}
+        >
           <div>
             <h2 className={`text-[15px] font-bold ${titleClass}`}>
               Find wisdom in the Quran
             </h2>
             <p className={`mt-1 text-[11px] ${subtitleClass}`}>
-              Search Arabic text or English translation
+              Search Surah, Page, Arabic text, or English translation
             </p>
           </div>
 
@@ -163,20 +413,20 @@ export function SearchModal({
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search mercy, prayer, الحمد..."
+              placeholder="Search Baqarah, page 2, mercy, الحمد..."
               className={`w-full bg-transparent text-[13px] outline-none ${inputClass}`}
               autoFocus
             />
           </label>
 
-          {!query.trim() ? (
+          {!hasQuery ? (
             <div className="mt-5">
               <p className={`mb-3 text-[12px] font-medium ${subtitleClass}`}>
                 Try to navigate
               </p>
 
               <div className="flex flex-wrap gap-2">
-                {["Al-Fatihah", "Juz 30", "Surah Yasin", "Page 1"].map(
+                {["Al-Fatihah", "Surah Yasin", "Page 2", "2", "الحمد"].map(
                   (item) => (
                     <button
                       key={item}
@@ -208,7 +458,7 @@ export function SearchModal({
             </div>
           ) : (
             <div className="mt-5 max-h-[56vh] space-y-3 overflow-y-auto pr-1">
-              {results.length === 0 ? (
+              {!hasResults ? (
                 <div
                   className={`rounded-2xl border border-dashed p-8 text-center ${emptyCardClass}`}
                 >
@@ -216,43 +466,121 @@ export function SearchModal({
                     No results found
                   </p>
                   <p className={`mt-1 text-sm ${subtitleClass}`}>
-                    Try another Arabic or English word.
+                    Try a Surah name, page number, Arabic word, or English word.
                   </p>
                 </div>
               ) : (
-                results.map(({ surah, ayah }) => (
-                  <Link
-                    key={`${surah.id}-${ayah.numberInSurah}`}
-                    href={`/${surah.id}#ayah-${ayah.numberInSurah}`}
-                    onClick={onClose}
-                    className={`block rounded-2xl border p-4 transition ${resultCardClass}`}
-                  >
-                    <div className="mb-3 flex items-center justify-between gap-3">
-                      <p className={`text-sm font-bold ${resultTitleClass}`}>
-                        {surah.englishName} {surah.id}:{ayah.numberInSurah}
+                <>
+                  {surahResults.map(({ surah }) => (
+                    <Link
+                      key={`surah-${surah.id}`}
+                      href={`/${surah.id}`}
+                      onClick={onClose}
+                      className={`block rounded-2xl border p-4 transition ${resultCardClass}`}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="mb-2 flex items-center gap-2">
+                            <span
+                              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${badgeClass}`}
+                            >
+                              <BookOpen size={12} />
+                              Surah {surah.id}
+                            </span>
+                          </div>
+
+                          <p className={`text-sm font-bold ${resultTitleClass}`}>
+                            {surah.englishName}
+                          </p>
+
+                          <p className={`mt-1 text-xs ${subtitleClass}`}>
+                            {surah.englishNameTranslation} · {surah.numberOfAyahs} Ayahs
+                          </p>
+                        </div>
+
+                        <p
+                          className={`arabic-text shrink-0 text-xl ${resultArabicNameClass}`}
+                        >
+                          {surah.arabicName}
+                        </p>
+                      </div>
+                    </Link>
+                  ))}
+
+                  {pageResults.map(({ page }) => (
+                    <button
+                      key={`page-${page.pageNumber}`}
+                      type="button"
+                      onClick={() => {
+                        onSelectReaderPage(page.pageNumber);
+                        onClose();
+                      }}
+                      className={`block w-full rounded-2xl border p-4 text-left transition ${resultCardClass}`}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="mb-2 flex items-center gap-2">
+                            <span
+                              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold ${badgeClass}`}
+                            >
+                              <FileText size={12} />
+                              Page {page.pageNumber}
+                            </span>
+                          </div>
+
+                          <p className={`text-sm font-bold ${resultTitleClass}`}>
+                            {page.surah.englishName}
+                          </p>
+
+                          <p className={`mt-1 text-xs ${subtitleClass}`}>
+                            Ayah {page.startAyah}-{page.endAyah} ·{" "}
+                            {page.surah.englishNameTranslation}
+                          </p>
+                        </div>
+
+                        <p
+                          className={`arabic-text shrink-0 text-xl ${resultArabicNameClass}`}
+                        >
+                          {page.surah.arabicName}
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+
+                  {ayahResults.map(({ surah, ayah }) => (
+                    <Link
+                      key={`ayah-${surah.id}-${ayah.numberInSurah}`}
+                      href={`/${surah.id}#ayah-${ayah.numberInSurah}`}
+                      onClick={onClose}
+                      className={`block rounded-2xl border p-4 transition ${resultCardClass}`}
+                    >
+                      <div className="mb-3 flex items-center justify-between gap-3">
+                        <p className={`text-sm font-bold ${resultTitleClass}`}>
+                          {surah.englishName} {surah.id}:{ayah.numberInSurah}
+                        </p>
+
+                        <p
+                          className={`arabic-text text-lg ${resultArabicNameClass}`}
+                        >
+                          {surah.arabicName}
+                        </p>
+                      </div>
+
+                      <p
+                        dir="rtl"
+                        className={`arabic-text mb-3 line-clamp-2 text-right text-2xl leading-loose ${resultArabicClass}`}
+                      >
+                        {ayah.arabic}
                       </p>
 
                       <p
-                        className={`arabic-text text-lg ${resultArabicNameClass}`}
+                        className={`line-clamp-2 text-sm leading-7 ${resultTranslationClass}`}
                       >
-                        {surah.arabicName}
+                        {ayah.translation}
                       </p>
-                    </div>
-
-                    <p
-                      dir="rtl"
-                      className={`arabic-text mb-3 line-clamp-2 text-right text-2xl leading-loose ${resultArabicClass}`}
-                    >
-                      {ayah.arabic}
-                    </p>
-
-                    <p
-                      className={`line-clamp-2 text-sm leading-7 ${resultTranslationClass}`}
-                    >
-                      {ayah.translation}
-                    </p>
-                  </Link>
-                ))
+                    </Link>
+                  ))}
+                </>
               )}
             </div>
           )}

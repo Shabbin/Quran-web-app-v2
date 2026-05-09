@@ -5,6 +5,21 @@
   --foreground: #17201a;
 }
 
+html[data-reader-theme="light"] {
+  --background: #f6f8f5;
+  --foreground: #17201a;
+}
+
+html[data-reader-theme="dark"] {
+  --background: #090b09;
+  --foreground: #f4f4f5;
+}
+
+html[data-reader-theme="sepia"] {
+  --background: #f6f1e7;
+  --foreground: #4f3c28;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -12,6 +27,7 @@
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
+  background: var(--background);
 }
 
 body {
@@ -58,6 +74,10 @@ select {
     scrollbar-color: #3d8738 transparent;
   }
 
+  html[data-reader-theme="sepia"] * {
+    scrollbar-color: #a07a50 transparent;
+  }
+
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
@@ -72,8 +92,16 @@ select {
     border-radius: 999px;
   }
 
+  html[data-reader-theme="sepia"] ::-webkit-scrollbar-thumb {
+    background: #a07a50;
+  }
+
   ::-webkit-scrollbar-thumb:hover {
     background: #347730;
+  }
+
+  html[data-reader-theme="sepia"] ::-webkit-scrollbar-thumb:hover {
+    background: #8f6d49;
   }
 
   ::-webkit-scrollbar-button {
