@@ -80,6 +80,9 @@ export function SettingsPanelContent({
       ? "text-[#a07a50]"
       : "text-[#7d918b]";
 
+  const sliderClass =
+    "w-full cursor-pointer transition active:scale-[0.99]";
+
   return (
     <div className="space-y-6">
       <section>
@@ -157,14 +160,15 @@ export function SettingsPanelContent({
 
               <input
                 type="range"
-                min="26"
-                max="42"
+                min="24"
+                max="48"
+                step="1"
                 value={settings.arabicFontSize}
                 onChange={(event) =>
                   onChange("arabicFontSize", Number(event.target.value))
                 }
                 style={{ accentColor: accent }}
-                className="w-full"
+                className={sliderClass}
               />
             </label>
 
@@ -185,12 +189,13 @@ export function SettingsPanelContent({
                 type="range"
                 min="14"
                 max="32"
+                step="1"
                 value={settings.translationFontSize}
                 onChange={(event) =>
                   onChange("translationFontSize", Number(event.target.value))
                 }
                 style={{ accentColor: accent }}
-                className="w-full"
+                className={sliderClass}
               />
             </label>
 

@@ -54,14 +54,14 @@ function sanitizeSettings(value: Partial<ReaderSettings>): ReaderSettings {
       : defaultSettings.arabicFont,
     arabicFontSize: clampNumber(
       value.arabicFontSize,
-      26,
-      42,
+      24,
+      48,
       defaultSettings.arabicFontSize
     ),
     translationFontSize: clampNumber(
       value.translationFontSize,
       14,
-      20,
+      32,
       defaultSettings.translationFontSize
     ),
   };
