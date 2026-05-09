@@ -1,14 +1,15 @@
 "use client";
 
 import type { ReaderPage, Surah } from "@quran-web-app/data";
-import { BookOpen, FileText, Search, X } from "lucide-react";
-import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useLockBodyScroll } from "@/hooks/use-lock-body-scroll";
 import {
   getAyahResults,
   getPageResults,
   getSurahResults,
-} from "../../lib/quran-search";
+} from "@/lib/quran-search";
+import { BookOpen, FileText, Search, X } from "lucide-react";
+import Link from "next/link";
+import { useMemo, useState } from "react";
 
 type SearchModalProps = {
   isOpen: boolean;
@@ -28,6 +29,8 @@ export function SearchModal({
   onClose,
 }: SearchModalProps) {
   const [query, setQuery] = useState("");
+
+  useLockBodyScroll(isOpen);
 
   const surahResults = useMemo(() => {
     return getSurahResults(surahs, query);
@@ -152,7 +155,7 @@ export function SearchModal({
 
   return (
     <div
-      className={`fixed inset-0 z-[70] flex items-end justify-center p-0 sm:items-center sm:p-6 ${overlayClass}`}
+      className={`fixed inset-0 z-[70] flex items-end justify-center overflow-hidden p-0 sm:items-center sm:p-6 ${overlayClass}`}
     >
       <button
         type="button"
@@ -162,7 +165,7 @@ export function SearchModal({
       />
 
       <section
-        className={`relative max-h-[88vh] w-full overflow-hidden rounded-t-[22px] shadow-2xl sm:max-w-2xl sm:rounded-[30px] ${modalClass}`}
+        className={`relative max-h-[88vh] w-full overflow-hidden overscroll-contain rounded-t-[22px] shadow-2xl sm:max-w-2xl sm:rounded-[30px] ${modalClass}`}
       >
         <header
           className={`flex items-start justify-between border-b p-4 ${borderClass}`}
@@ -243,7 +246,7 @@ export function SearchModal({
               </p>
             </div>
           ) : (
-            <div className="mt-5 max-h-[56vh] space-y-3 overflow-y-auto pr-1">
+            <div className="mt-5 max-h-[56vh] space-y-3 overflow-y-auto overscroll-contain pr-1">
               {!hasResults ? (
                 <div
                   className={`rounded-2xl border border-dashed p-8 text-center ${emptyCardClass}`}

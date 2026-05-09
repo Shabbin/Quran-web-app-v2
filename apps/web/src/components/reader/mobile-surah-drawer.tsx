@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReaderPage, Surah } from "@quran-web-app/data";
+import { useLockBodyScroll } from "@/hooks/use-lock-body-scroll";
 import { Search, X } from "lucide-react";
 import Image from "next/image";
 import { MobilePageList } from "./mobile-page-list";
@@ -33,6 +34,8 @@ export function MobileSurahDrawer({
   isOpen,
   onClose,
 }: MobileSurahDrawerProps) {
+  useLockBodyScroll(isOpen);
+
   if (!isOpen) {
     return null;
   }
@@ -143,8 +146,10 @@ export function MobileSurahDrawer({
           : "text-slate-500";
 
   return (
-    <div className="fixed inset-0 z-50 lg:hidden">
-      <aside className={`h-full overflow-hidden ${drawerClass}`}>
+    <div className="fixed inset-0 z-50 overflow-hidden lg:hidden">
+      <aside
+        className={`h-full overflow-hidden overscroll-contain ${drawerClass}`}
+      >
         <div
           className={`flex h-[56px] items-center justify-between border-b px-4 ${borderClass}`}
         >
@@ -235,7 +240,7 @@ export function MobileSurahDrawer({
           </label>
         </div>
 
-        <div className="h-[calc(100vh-178px)] overflow-y-auto px-3 pb-5">
+        <div className="h-[calc(100vh-178px)] overflow-y-auto overscroll-contain px-3 pb-5">
           {activeSidebarMode === "surah" ? (
             <MobileSurahList
               surahs={surahs}
