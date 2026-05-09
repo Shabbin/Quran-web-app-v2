@@ -36,10 +36,10 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
-    "@types/node": "^25.6.2"
+    "@types/node": "^25.6.2",
+    "eslint": "^9.39.4"
   },
   "optionalDependencies": {
-  "@tailwindcss/oxide-linux-x64-gnu": "^4"
-}
-
+    "@tailwindcss/oxide-linux-x64-gnu": "^4"
+  }
 }
