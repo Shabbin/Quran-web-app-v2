@@ -46,31 +46,35 @@ export function SettingsPanel({
 
   return (
     <aside
-      className={`fixed right-0 top-[64px] z-40 hidden h-[calc(100vh-64px)] w-[330px] border-l px-6 py-5 xl:block ${panelClass}`}
+      className={`fixed right-0 top-[64px] z-40 hidden h-[calc(100vh-64px)] w-[330px] overflow-hidden border-l xl:block ${panelClass}`}
     >
-      <div className={`mb-7 rounded-[22px] p-1 ${tabWrapperClass}`}>
-        <div className="grid grid-cols-2 text-[14px] font-semibold">
-          <button
-            type="button"
-            className={`rounded-[18px] py-2.5 shadow-sm ${activeTabClass}`}
-          >
-            Translation
-          </button>
+      <div className="flex h-full flex-col px-6 py-5">
+        <div className={`mb-6 shrink-0 rounded-[22px] p-1 ${tabWrapperClass}`}>
+          <div className="grid grid-cols-2 text-[14px] font-semibold">
+            <button
+              type="button"
+              className={`rounded-[18px] py-2.5 shadow-sm ${activeTabClass}`}
+            >
+              Translation
+            </button>
 
-          <button
-            type="button"
-            className={`rounded-[18px] py-2.5 ${inactiveTabClass}`}
-          >
-            Reading
-          </button>
+            <button
+              type="button"
+              className={`rounded-[18px] py-2.5 ${inactiveTabClass}`}
+            >
+              Reading
+            </button>
+          </div>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+          <SettingsPanelContent
+            settings={settings}
+            resolvedTheme={resolvedTheme}
+            onChange={onChange}
+          />
         </div>
       </div>
-
-      <SettingsPanelContent
-        settings={settings}
-        resolvedTheme={resolvedTheme}
-        onChange={onChange}
-      />
     </aside>
   );
 }

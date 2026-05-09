@@ -4,13 +4,7 @@ import type {
   ReaderSettings,
   ReaderTheme,
 } from "@/hooks/use-reader-settings";
-import {
-  Heart,
-  Moon,
-  Search,
-  Settings,
-  Sun,
-} from "lucide-react";
+import { Heart, Moon, Search, Settings, Sun } from "lucide-react";
 import { useMemo, useState } from "react";
 
 type DesktopTopbarProps = {
@@ -97,27 +91,27 @@ export function DesktopTopbar({
 
   return (
     <header
-      className={`fixed left-[72px] right-0 top-0 z-[80] hidden h-[64px] items-center border-b px-0 lg:flex ${headerClass}`}
+      className={`fixed left-[72px] right-0 top-0 z-[80] hidden h-[64px] items-center border-b lg:flex ${headerClass}`}
     >
-      <div className="flex h-full min-w-[340px] items-center px-6">
-        <div>
-          <h1 className={`text-[22px] font-bold leading-none ${titleClass}`}>
+      <div className="flex h-full min-w-[340px] items-center pl-7 pr-6">
+        <div className="flex flex-col justify-center">
+          <h1 className={`text-[22px] font-bold leading-[1.05] ${titleClass}`}>
             Quran Mazid
           </h1>
-          <p className={`mt-1 text-[11px] ${subtitleClass}`}>
+          <p className={`mt-1.5 text-[11px] leading-none ${subtitleClass}`}>
             Read, Study, and Learn The Quran
           </p>
         </div>
       </div>
 
-      <div className="flex flex-1 items-center justify-end gap-4 px-6">
+      <div className="flex h-full flex-1 items-center justify-end gap-3.5 px-6">
         <button
           type="button"
           onClick={onOpenSearch}
           aria-label="Search Quran"
           className={`flex h-10 w-10 items-center justify-center rounded-full transition ${circleButtonClass}`}
         >
-          <Search size={19} />
+          <Search size={18} />
         </button>
 
         <div className="relative">

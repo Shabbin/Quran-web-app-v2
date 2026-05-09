@@ -4,13 +4,7 @@ import type {
   ArabicFont,
   ReaderSettings,
 } from "@/hooks/use-reader-settings";
-import {
-  BookOpen,
-  ChevronDown,
-  ChevronUp,
-  SlidersHorizontal,
-  Type,
-} from "lucide-react";
+import { BookOpen, ChevronDown, ChevronUp, Type } from "lucide-react";
 import { useState } from "react";
 
 type SettingsPanelContentProps = {
@@ -67,7 +61,7 @@ export function SettingsPanelContent({
   const supportCardClass = isDark
     ? "border-emerald-900/30 bg-emerald-950/20"
     : isSepia
-      ? "border-[#dfcfb3] bg-[#eee3d1]"
+      ? "border-[#dfcfb3] bg-[#f1e8d9]"
       : "border-emerald-100 bg-[#f1f8ef]";
 
   const supportButtonClass = isSepia
@@ -80,11 +74,10 @@ export function SettingsPanelContent({
       ? "text-[#a07a50]"
       : "text-[#7d918b]";
 
-  const sliderClass =
-    "w-full cursor-pointer transition active:scale-[0.99]";
+  const sliderClass = "w-full cursor-pointer transition active:scale-[0.99]";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-5">
       <section>
         <button
           type="button"
@@ -225,19 +218,11 @@ export function SettingsPanelContent({
       </section>
 
       <section className={`rounded-[18px] border p-4 ${supportCardClass}`}>
-        <div className="mb-2.5 flex items-start gap-2">
-          <SlidersHorizontal
-            size={18}
-            className="mt-1 shrink-0"
-            style={{ color: accent }}
-          />
+        <h3 className={`text-[15px] font-bold leading-6 ${headingTextClass}`}>
+          Help spread the knowledge of Islam
+        </h3>
 
-          <h3 className={`text-[15px] font-bold leading-6 ${headingTextClass}`}>
-            Help spread the knowledge of Islam
-          </h3>
-        </div>
-
-        <p className={`text-[13px] leading-6 ${bodyTextClass}`}>
+        <p className={`mt-3 text-[13px] leading-6 ${bodyTextClass}`}>
           Your regular support helps us reach our religious brothers and sisters
           with the message of Islam.
         </p>
