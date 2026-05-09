@@ -55,7 +55,7 @@ export function AyahCard({
   return (
     <article
       id={`ayah-${ayah.numberInSurah}`}
-      className={`border-b px-4 py-7 sm:px-6 lg:px-8 ${articleClass}`}
+      className={`scroll-mt-24 border-b px-4 py-7 sm:px-6 lg:scroll-mt-28 lg:px-8 ${articleClass}`}
     >
       <div className="mx-auto grid max-w-4xl gap-5 lg:grid-cols-[52px_minmax(0,1fr)] lg:gap-8">
         <div className="hidden lg:flex lg:flex-col lg:items-center lg:gap-3">

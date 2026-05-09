@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReaderPage, SearchResult, Surah } from "@quran-web-app/data";
-import { searchAyahs } from "@quran-web-app/data";
+import { ayahs, searchAyahs, surahs as allSurahs } from "@quran-web-app/data";
 import { BookOpen, FileText, Search, X } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -75,6 +75,7 @@ function matchesLoose(values: Array<string | number>, query: string) {
 
   return values.some((value) => {
     const normalizedValue = normalizeSearchValue(String(value));
+
     return (
       normalizedValue.includes(normalizedQuery) ||
       normalizedQuery.includes(normalizedValue)
@@ -123,7 +124,9 @@ function getSurahResults(surahs: Surah[], query: string): SurahSearchResult[] {
         score += 60;
       }
 
-      const normalizedQuery = normalizeSearchValue(removeNavigationWords(trimmedQuery));
+      const normalizedQuery = normalizeSearchValue(
+        removeNavigationWords(trimmedQuery)
+      );
       const normalizedEnglishName = normalizeSearchValue(surah.englishName);
       const normalizedEnglishNameWithoutAl = normalizeSearchValue(
         surah.englishName.replace(/^Al-/i, "")
@@ -203,10 +206,44 @@ function getPageResults(
     })
     .filter((item) => item.score > 0)
     .sort(
-      (a, b) => b.score - a.score || a.result.page.pageNumber - b.result.page.pageNumber
+      (a, b) =>
+        b.score - a.score || a.result.page.pageNumber - b.result.page.pageNumber
     )
     .slice(0, 8)
     .map((item) => item.result);
+}
+
+function getDirectAyahReference(query: string): SearchResult | null {
+  const trimmedQuery = query.trim();
+
+  const referenceMatch =
+    trimmedQuery.match(/^(\d{1,3})\s*[:.-]\s*(\d{1,3})$/) ||
+    trimmedQuery.match(/^(\d{1,3})\s+(\d{1,3})$/) ||
+    trimmedQuery.match(
+      /\b(?:surah|sura|chapter)\s*(\d{1,3})\D+(?:ayah|aya|verse)\s*(\d{1,3})\b/i
+    );
+
+  if (!referenceMatch) {
+    return null;
+  }
+
+  const surahId = Number(referenceMatch[1]);
+  const ayahNumber = Number(referenceMatch[2]);
+
+  const ayah = ayahs.find(
+    (item) => item.surahId === surahId && item.numberInSurah === ayahNumber
+  );
+
+  const surah = allSurahs.find((item) => item.id === surahId);
+
+  if (!ayah || !surah) {
+    return null;
+  }
+
+  return {
+    surah,
+    ayah,
+  };
 }
 
 function getAyahResults(query: string): SearchResult[] {
@@ -216,26 +253,22 @@ function getAyahResults(query: string): SearchResult[] {
     return [];
   }
 
-  const ayahReferenceMatch = trimmedQuery.match(/^(\d{1,3})\s*[:.-]\s*(\d{1,3})$/);
+  const directReference = getDirectAyahReference(trimmedQuery);
+  const textResults = searchAyahs(trimmedQuery);
 
-  const results = searchAyahs(trimmedQuery);
-
-  if (!ayahReferenceMatch) {
-    return results.slice(0, 30);
+  if (!directReference) {
+    return textResults.slice(0, 30);
   }
 
-  const surahId = Number(ayahReferenceMatch[1]);
-  const ayahNumber = Number(ayahReferenceMatch[2]);
-
-  const exactResults = results.filter(
-    ({ ayah }) => ayah.surahId === surahId && ayah.numberInSurah === ayahNumber
+  const remainingResults = textResults.filter(
+    ({ ayah }) =>
+      !(
+        ayah.surahId === directReference.ayah.surahId &&
+        ayah.numberInSurah === directReference.ayah.numberInSurah
+      )
   );
 
-  const otherResults = results.filter(
-    ({ ayah }) => !(ayah.surahId === surahId && ayah.numberInSurah === ayahNumber)
-  );
-
-  return [...exactResults, ...otherResults].slice(0, 30);
+  return [directReference, ...remainingResults].slice(0, 30);
 }
 
 export function SearchModal({
@@ -391,7 +424,8 @@ export function SearchModal({
               Find wisdom in the Quran
             </h2>
             <p className={`mt-1 text-[11px] ${subtitleClass}`}>
-              Search Surah, Page, Arabic text, or English translation
+              Search Surah, Page, Ayah reference, Arabic text, or English
+              translation
             </p>
           </div>
 
@@ -413,7 +447,7 @@ export function SearchModal({
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search Baqarah, page 2, mercy, الحمد..."
+              placeholder="Search 2:245, Baqarah, page 2, mercy, الحمد..."
               className={`w-full bg-transparent text-[13px] outline-none ${inputClass}`}
               autoFocus
             />
@@ -426,18 +460,22 @@ export function SearchModal({
               </p>
 
               <div className="flex flex-wrap gap-2">
-                {["Al-Fatihah", "Surah Yasin", "Page 2", "2", "الحمد"].map(
-                  (item) => (
-                    <button
-                      key={item}
-                      type="button"
-                      onClick={() => setQuery(item)}
-                      className={`rounded-[10px] px-3 py-2 text-[12px] font-medium transition ${chipClass}`}
-                    >
-                      {item}
-                    </button>
-                  )
-                )}
+                {[
+                  "Al-Fatihah",
+                  "Surah Yasin",
+                  "Page 2",
+                  "2:245",
+                  "الحمد",
+                ].map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => setQuery(item)}
+                    className={`rounded-[10px] px-3 py-2 text-[12px] font-medium transition ${chipClass}`}
+                  >
+                    {item}
+                  </button>
+                ))}
               </div>
 
               <p className={`mt-7 text-[12px] font-medium ${subtitleClass}`}>
@@ -466,7 +504,8 @@ export function SearchModal({
                     No results found
                   </p>
                   <p className={`mt-1 text-sm ${subtitleClass}`}>
-                    Try a Surah name, page number, Arabic word, or English word.
+                    Try a Surah name, page number, ayah reference, Arabic word,
+                    or English word.
                   </p>
                 </div>
               ) : (
@@ -489,12 +528,15 @@ export function SearchModal({
                             </span>
                           </div>
 
-                          <p className={`text-sm font-bold ${resultTitleClass}`}>
+                          <p
+                            className={`text-sm font-bold ${resultTitleClass}`}
+                          >
                             {surah.englishName}
                           </p>
 
                           <p className={`mt-1 text-xs ${subtitleClass}`}>
-                            {surah.englishNameTranslation} · {surah.numberOfAyahs} Ayahs
+                            {surah.englishNameTranslation} ·{" "}
+                            {surah.numberOfAyahs} Ayahs
                           </p>
                         </div>
 
@@ -528,7 +570,9 @@ export function SearchModal({
                             </span>
                           </div>
 
-                          <p className={`text-sm font-bold ${resultTitleClass}`}>
+                          <p
+                            className={`text-sm font-bold ${resultTitleClass}`}
+                          >
                             {page.surah.englishName}
                           </p>
 

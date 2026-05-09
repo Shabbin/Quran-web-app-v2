@@ -6,17 +6,17 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useReaderSettings } from "@/hooks/use-reader-settings";
-import { AyahCard } from "./ayah-card";
-import { BottomNav } from "./bottom-nav";
-import { DesktopTopbar } from "./desktop-topbar";
-import { IconSidebar } from "./icon-sidebar";
-import { MobileHeader } from "./mobile-header";
-import { MobileSettingsDrawer } from "./mobile-settings-drawer";
-import { MobileSurahDrawer } from "./mobile-surah-drawer";
-import { PageScrollbar } from "./page-scrollbar";
-import { SearchModal } from "./search-modal";
-import { SettingsPanel } from "./settings-panel";
-import { SurahSidebar } from "./surah-sidebar";
+import { AyahCard } from "./reader/ayah-card";
+import { BottomNav } from "./navigation/bottom-nav";
+import { DesktopTopbar } from "./navigation/desktop-topbar";
+import { IconSidebar } from "./navigation/icon-sidebar";
+import { MobileHeader } from "./navigation/mobile-header";
+import { MobileSettingsDrawer } from "./settings/mobile-settings-drawer";
+import { MobileSurahDrawer } from "./reader/mobile-surah-drawer";
+import { PageScrollbar } from "./reader/page-scrollbar";
+import { SearchModal } from "./search/search-modal";
+import { SettingsPanel } from "./settings/settings-panel";
+import { SurahSidebar } from "./reader/surah-sidebar";
 
 type SidebarMode = "surah" | "juz" | "page";
 
