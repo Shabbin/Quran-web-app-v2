@@ -14,6 +14,8 @@ export type ReaderSettings = {
 
 const STORAGE_KEY = "quran-reader-settings";
 
+let hasCompletedFirstThemeMount = false;
+
 const defaultSettings: ReaderSettings = {
   theme: "light",
   arabicFont: "amiri",
@@ -32,7 +34,12 @@ function clampNumber(value: unknown, min: number, max: number, fallback: number)
 }
 
 function isValidTheme(value: unknown): value is ReaderTheme {
-  return value === "light" || value === "dark" || value === "sepia" || value === "system";
+  return (
+    value === "light" ||
+    value === "dark" ||
+    value === "sepia" ||
+    value === "system"
+  );
 }
 
 function isValidArabicFont(value: unknown): value is ArabicFont {
@@ -60,6 +67,39 @@ function sanitizeSettings(value: Partial<ReaderSettings>): ReaderSettings {
   };
 }
 
+function getSystemTheme(): "light" | "dark" {
+  if (typeof window === "undefined") {
+    return "light";
+  }
+
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
+}
+
+function resolveTheme(theme: ReaderTheme, systemTheme: "light" | "dark") {
+  return theme === "system" ? systemTheme : theme;
+}
+
+function applyTheme(theme: "light" | "dark" | "sepia") {
+  if (typeof document === "undefined") {
+    return;
+  }
+
+  document.documentElement.dataset.readerTheme = theme;
+  document.documentElement.classList.toggle("dark", theme === "dark");
+  document.documentElement.style.colorScheme =
+    theme === "dark" ? "dark" : "light";
+}
+
+function saveSettings(settings: ReaderSettings) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+}
+
 function getInitialSettings(): ReaderSettings {
   if (typeof window === "undefined") {
     return defaultSettings;
@@ -78,42 +118,83 @@ function getInitialSettings(): ReaderSettings {
   }
 }
 
-function getSystemTheme(): "light" | "dark" {
-  if (typeof window === "undefined") {
-    return "light";
-  }
-
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
-}
-
 export function useReaderSettings() {
-  const [settings, setSettings] = useState<ReaderSettings>(getInitialSettings);
+  const [isThemeReady, setIsThemeReady] = useState(
+    hasCompletedFirstThemeMount
+  );
 
-  useEffect(() => {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-  }, [settings]);
+  const [settings, setSettings] = useState<ReaderSettings>(getInitialSettings);
+  const [systemTheme, setSystemTheme] = useState<"light" | "dark">(
+    getSystemTheme
+  );
 
   const resolvedTheme = useMemo(() => {
-    if (settings.theme === "system") {
-      return getSystemTheme();
+    return resolveTheme(settings.theme, systemTheme);
+  }, [settings.theme, systemTheme]);
+
+  useEffect(() => {
+    applyTheme(resolvedTheme);
+    saveSettings(settings);
+
+    if (hasCompletedFirstThemeMount) {
+      return;
     }
 
-    return settings.theme;
-  }, [settings.theme]);
+    const frameId = window.requestAnimationFrame(() => {
+      hasCompletedFirstThemeMount = true;
+      setIsThemeReady(true);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [resolvedTheme, settings]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const handleChange = () => {
+      const nextSystemTheme = mediaQuery.matches ? "dark" : "light";
+
+      setSystemTheme(nextSystemTheme);
+
+      setSettings((currentSettings) => {
+        if (currentSettings.theme === "system") {
+          applyTheme(nextSystemTheme);
+        }
+
+        return currentSettings;
+      });
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener("change", handleChange);
+    };
+  }, []);
 
   const updateSettings = <K extends keyof ReaderSettings>(
     key: K,
     value: ReaderSettings[K]
   ) => {
     setSettings((current) => {
-      const nextSettings = {
+      const nextSettings = sanitizeSettings({
         ...current,
         [key]: value,
-      };
+      });
 
-      return sanitizeSettings(nextSettings);
+      const nextResolvedTheme = resolveTheme(
+        nextSettings.theme,
+        getSystemTheme()
+      );
+
+      applyTheme(nextResolvedTheme);
+      saveSettings(nextSettings);
+
+      hasCompletedFirstThemeMount = true;
+
+      return nextSettings;
     });
   };
 
@@ -121,5 +202,6 @@ export function useReaderSettings() {
     settings,
     resolvedTheme,
     updateSettings,
+    isThemeReady,
   };
 }

@@ -43,7 +43,8 @@ export function QuranAppShell({ surahs, activeSurah }: QuranAppShellProps) {
     number | null
   >(null);
 
-  const { settings, resolvedTheme, updateSettings } = useReaderSettings();
+  const { settings, resolvedTheme, updateSettings, isThemeReady } =
+    useReaderSettings();
 
   const readerPages = useMemo(() => getReaderPages(), []);
 
@@ -94,6 +95,18 @@ export function QuranAppShell({ surahs, activeSurah }: QuranAppShellProps) {
   const isDark = resolvedTheme === "dark";
   const isSepia = resolvedTheme === "sepia";
 
+  if (!isThemeReady) {
+    return (
+      <main
+        className="min-h-screen"
+        style={{
+          background: "var(--background)",
+          color: "var(--foreground)",
+        }}
+      />
+    );
+  }
+
   const shellClass = isDark
     ? "dark bg-[#090b09] text-zinc-100"
     : isSepia
@@ -125,7 +138,7 @@ export function QuranAppShell({ surahs, activeSurah }: QuranAppShellProps) {
       : "text-[#78908a]";
 
   const makkahImageClass = isDark
-    ? "object-contain invert opacity-[80] contrast-125 brightness-125"
+    ? "object-contain invert opacity-[0.8] contrast-125 brightness-125"
     : "object-contain opacity-100";
 
   const pageButtonBaseClass =
@@ -341,6 +354,9 @@ export function QuranAppShell({ surahs, activeSurah }: QuranAppShellProps) {
       <SearchModal
         isOpen={isSearchOpen}
         resolvedTheme={resolvedTheme}
+        surahs={surahs}
+        readerPages={readerPages}
+        onSelectReaderPage={handleSelectReaderPage}
         onClose={() => setIsSearchOpen(false)}
       />
 
